@@ -1,34 +1,8 @@
 package libvirt
 
 import (
-	"fmt"
-	"math/rand"
 	"net"
 )
-
-// randomMACAddress returns a randomized MAC address
-// with libvirt prefix.
-//nolint:gomnd
-func randomMACAddress() (string, error) {
-	buf := make([]byte, 3)
-	//nolint:gosec // math.rand is enough for this
-	if _, err := rand.Read(buf); err != nil {
-		return "", err
-	}
-
-	// set local bit and unicast
-	buf[0] = (buf[0] | 2) & 0xfe
-	// Set the local bit
-	buf[0] |= 2
-
-	// avoid libvirt-reserved addresses
-	if buf[0] == 0xfe {
-		buf[0] = 0xee
-	}
-
-	return fmt.Sprintf("52:54:00:%02x:%02x:%02x",
-		buf[0], buf[1], buf[2]), nil
-}
 
 //nolint:gomnd
 func getNetMaskWithMax16Bits(m net.IPMask) net.IPMask {
