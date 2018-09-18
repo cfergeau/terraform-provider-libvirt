@@ -64,10 +64,9 @@ func newNetworkDef() libvirtxml.Network {
 	}
 }
 
-func getHostXMLDesc(ip, mac, name string) string {
+func getHostXMLDesc(ip, name string) string {
 	dd := libvirtxml.NetworkDHCPHost{
 		IP:   ip,
-		MAC:  mac,
 		Name: name,
 	}
 	tmp := struct {
@@ -82,8 +81,8 @@ func getHostXMLDesc(ip, mac, name string) string {
 }
 
 // Adds a new static host to the network
-func addHost(virConn *libvirt.Libvirt, n libvirt.Network, ip, mac, name string, xmlIdx int) error {
-	xmlDesc := getHostXMLDesc(ip, mac, name)
+func addHost(virConn *libvirt.Libvirt, n libvirt.Network, ip, name string, xmlIdx int) error {
+	xmlDesc := getHostXMLDesc(ip, name)
 	log.Printf("Adding host with XML:\n%s", xmlDesc)
 	// From https://libvirt.org/html/libvirt-libvirt-network.html#virNetworkUpdateFlags
 	// Update live and config for hosts to make update permanent across reboots
@@ -93,8 +92,8 @@ func addHost(virConn *libvirt.Libvirt, n libvirt.Network, ip, mac, name string, 
 }
 
 // Update a static host from the network
-func updateHost(virConn *libvirt.Libvirt, n libvirt.Network, ip, mac, name string, xmlIdx int) error {
-	xmlDesc := getHostXMLDesc(ip, mac, name)
+func updateHost(virConn *libvirt.Libvirt, n libvirt.Network, ip, name string, xmlIdx int) error {
+	xmlDesc := getHostXMLDesc(ip, name)
 	log.Printf("Updating host with XML:\n%s", xmlDesc)
 	// From https://libvirt.org/html/libvirt-libvirt-network.html#virNetworkUpdateFlags
 	// Update live and config for hosts to make update permanent across reboots
@@ -137,12 +136,12 @@ func updateOrAddHost(virConn *libvirt.Libvirt, n libvirt.Network, ip, mac, name 
 		log.Printf("Error during detecting network index: %s\nUsing default value: %d", err, xmlIdx)
 	}
 
-	err = updateHost(virConn, n, ip, mac, name, xmlIdx)
+	err = updateHost(virConn, n, ip, name, xmlIdx)
 	// FIXME: libvirt.Error.DomainID is not available from library. Is it still required here?
 	//  && virErr.Error.DomainID == uint32(.....FromNetwork) {
 	if virErr, ok := err.(libvirt.Error); ok && virErr.Code == uint32(libvirt.ErrOperationInvalid) {
 		log.Printf("[DEBUG]: karl: updateOrAddHost before addHost()\n")
-		return addHost(virConn, n, ip, mac, name, xmlIdx)
+		return addHost(virConn, n, ip, name, xmlIdx)
 	}
 	return err
 }
