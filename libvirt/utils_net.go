@@ -38,29 +38,6 @@ func (l *networkUpdateWorkaroundLibvirt) NetworkUpdate(Net libvirt.Network, Comm
 	return l.Libvirt.NetworkUpdate(Net, Command, Section, ParentIndex, XML, Flags)
 }
 
-// randomMACAddress returns a randomized MAC address
-// with libvirt prefix
-func randomMACAddress() (string, error) {
-	buf := make([]byte, 3)
-	rand.Seed(time.Now().UnixNano())
-	if _, err := rand.Read(buf); err != nil {
-		return "", err
-	}
-
-	// set local bit and unicast
-	buf[0] = (buf[0] | 2) & 0xfe
-	// Set the local bit
-	buf[0] |= 2
-
-	// avoid libvirt-reserved addresses
-	if buf[0] == 0xfe {
-		buf[0] = 0xee
-	}
-
-	return fmt.Sprintf("52:54:00:%02x:%02x:%02x",
-		buf[0], buf[1], buf[2]), nil
-}
-
 // randomPort returns a random port
 func randomPort() int {
 	const minPort = 1024
