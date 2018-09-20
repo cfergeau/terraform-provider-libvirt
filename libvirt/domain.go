@@ -54,7 +54,7 @@ func domainWaitForLeases(ctx context.Context, virConn *libvirt.Libvirt, domain l
 				continue
 			}
 			if !found {
-				log.Printf("[DEBUG] IP address not found for iface=%+v: will try in a while", strings.ToUpper(iface.MAC.Address))
+				log.Printf("[DEBUG] IP address not found for interface  %+v  will try in a while", iface)
 				return false, domWaitLeaseStillWaiting, nil
 			}
 		}
@@ -96,13 +96,13 @@ func domainIfaceHasAddress(virConn *libvirt.Libvirt, domain libvirt.Domain,
 	log.Printf("[DEBUG] ifaces with addresses: %+v\n", ifacesWithAddr)
 
 	for _, ifaceWithAddr := range ifacesWithAddr {
-		if len(ifaceWithAddr.Hwaddr) > 0 && (mac == strings.ToUpper(ifaceWithAddr.Hwaddr[0])) {
-			log.Printf("[DEBUG] found IPs for MAC=%+v: %+v\n", mac, ifaceWithAddr.Addrs)
+		if len(ifaceWithAddr.Hwaddr) > 0 {
+			log.Printf("[DEBUG] found IPs for: %+v\n", ifaceWithAddr.Name)
 			return true, false, nil
 		}
 	}
 
-	log.Printf("[DEBUG] %+v doesn't have IP address(es) yet...\n", mac)
+	log.Printf("[DEBUG] doesn't have IP address(es) yet...")
 	return false, false, nil
 }
 
